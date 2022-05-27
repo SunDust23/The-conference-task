@@ -20,7 +20,7 @@ const Room = sequelize.define('room', {
     subject: { type: DataTypes.STRING }
 })
 
-const Shedule = sequelize.define('shedule', {
+const Schedule = sequelize.define('schedule', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     datetime: { type: DataTypes.DATE, allowNull: false }
 })
@@ -29,11 +29,11 @@ const Speaker = sequelize.define('speaker', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }
 })
 
-Room.hasMany(Shedule);
-Shedule.belongsTo(Room);
+Room.hasMany(Schedule);
+Schedule.belongsTo(Room);
 
-Talk.hasMany(Shedule);
-Shedule.belongsTo(Talk);
+Talk.hasMany(Schedule);
+Schedule.belongsTo(Talk);
 
 User.belongsToMany(Talk, {through: Speaker});
 Talk.belongsToMany(User, {through: Speaker});
@@ -43,5 +43,5 @@ module.exports={
     Talk,
     Speaker,
     Room,
-    Shedule
+    Schedule
 }
