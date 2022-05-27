@@ -6,6 +6,7 @@ const cors = require('cors');
 const sequelize = require('./db');
 const models = require('./models/models');
 const router = require('./routes/routes');
+const errorHandler = require('./middleware/ErrorHandlingMiddleware');
 
 const PORT = process.env.PORT || 7000;
 
@@ -14,6 +15,8 @@ app.use(cors());            // Нужен, чтобы принимать зап�
 app.use(express.json());    // Необходимо, чтобы приложение могло парсить JSON формат  
 
 app.use('/api', router);    // '/api' - URL, по которому должен обрабатывается router
+
+app.use(errorHandler);      // Обработка ошибок !!!Обязательно идёт последним!!!
 
 //Все операции с БД - асинхронные
 const start = async () => {
