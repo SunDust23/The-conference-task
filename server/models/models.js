@@ -29,14 +29,14 @@ const Speaker = sequelize.define('speaker', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }
 })
 
-Room.hasMany(Schedule);
+Room.hasMany(Schedule, {onDelete: 'cascade'});
 Schedule.belongsTo(Room);
 
-Talk.hasMany(Schedule);
+Talk.hasMany(Schedule, {onDelete: 'cascade'});
 Schedule.belongsTo(Talk);
 
-User.belongsToMany(Talk, {through: Speaker});
-Talk.belongsToMany(User, {through: Speaker});
+User.belongsToMany(Talk, {through: Speaker, onDelete: 'cascade'});
+Talk.belongsToMany(User, {through: Speaker, onDelete: 'cascade'});
 
 module.exports={
     User,
