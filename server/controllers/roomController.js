@@ -1,7 +1,7 @@
 const { Room } = require('../models/models');
 const ApiError = require('../error/ApiError');
 
-const status_code = require('../error/BadRequestErrorMessages');
+const status_code = require('../error/ErrorMessages');
 
 
 class RoomController {
