@@ -1,4 +1,4 @@
-const { Talk, Speaker } = require('../models/models');
+const { User, Talk, Speaker } = require('../models/models');
 const ApiError = require('../error/ApiError');
 
 const status_code = require('../error/ErrorMessages');
@@ -26,11 +26,18 @@ class TalkController {
     async addUser(req, res, next) {
         try {
             const { userId } = req.body;
+            console.log(userId);
             const newUser = await User.findOne({ where: { id: userId } });
+
+            console.log(newUser);
+
             if (!newUser) {
                 return next(ApiError.badRequest(status_code[452]));
             }
             const { id } = req.params;
+
+            console.log(id);
+
             const talk = await Talk.findOne(
                 {
                     where: { id }
@@ -70,7 +77,7 @@ class TalkController {
                 return next(ApiError.badRequest(status_code[474]));
             }
 
-            const talk = await Talk.findOne(
+            let talk = await Talk.findOne(
                 {
                     where: { id }
                 },
@@ -78,6 +85,8 @@ class TalkController {
             if (!talk) {
                 return next(ApiError.badRequest(status_code[472]));
             }
+
+            //Здесь, возможно, нужна проверка на то, является ли докладчик автором доклалда или это админ
 
             await Talk.update(
                 {
@@ -87,6 +96,12 @@ class TalkController {
                 {
                     where: { id },
                 }
+            );
+
+            talk = await Talk.findOne(
+                {
+                    where: { id }
+                },
             );
 
             return res.json(talk);
@@ -101,7 +116,12 @@ class TalkController {
             if (!delTalk) {
                 return next(ApiError.badRequest(status_code[472]));
             }
-            let talk = await Talk.destroy({ where: { id } });
+            let talkId = id;
+
+            //Здесь, возможно, нужна проверка на то, является ли докладчик автором доклалда или это админ
+
+            await Talk.destroy({ where: { id } });
+
             return res.json(`Запись ${id} удалена`);
         } catch (e) {
             next(ApiError.badRequest(e.message));
