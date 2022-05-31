@@ -9,6 +9,8 @@ const ApiError = require('../error/ApiError');
 const status_code = require('../error/ErrorMessages');
 const userService = require('../service/user-service');
 
+const { validationResult } = require('express-validator');
+
 
 // const generateJwt = (id, username, role) => {
 //     return jwt.sign(
@@ -20,17 +22,18 @@ const userService = require('../service/user-service');
 
 class UserController {
 
-      ////////////
-     /// AUTH ///
+    ////////////
+    /// AUTH ///
     ////////////
 
     async registration(req, res, next) {
         try {
-            const { email, password, role } = req.body;
-            if (!email || !password) {
-                return next(ApiError.badRequest(status_code[463]));
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return next(ApiError.badRequest(`Ошибка при валидации`, errors.array()));
             }
 
+            const { email, password, role } = req.body;
             const userData = await userService.registration(email, password, role);
             res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true })
             return res.json(userData);
@@ -38,44 +41,40 @@ class UserController {
         } catch (e) {
             next(ApiError.badRequest(e.message));
         }
-
-
-        // const candidate = await User.findOne({ where: { username } });
-        // if (candidate) {
-        //     return next(ApiError.badRequest(status_code[453]));
-        // }
-        // const hashPassword = await bcrypt.hash(password, 5);
-        // const user = await User.create({ username, role, password: hashPassword });
-
-        // const token = generateJwt(user.id, user.username, user.role);
-        // return res.json({ token })
     }
 
     async login(req, res, next) {
-        const { username, password } = req.body;
-        const user = await User.findOne({ where: { username } });
-        if (!user) {
-            return next(ApiError.badRequest(status_code[452]));
+        try {
+            const { email, password } = req.body;
+            const userData = await userService.login(email, password);
+            res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true })
+            return res.json(userData);
+
+        } catch (e) {
+            next(ApiError.badRequest(e.message));
         }
-        let comparePassword = bcrypt.compareSync(password, user.password);
-        if (!comparePassword) {
-            return next(ApiError.badRequest(status_code[462]));
-        }
-        const token = generateJwt(user.id, user.username, user.role);
-        return res.json({ token });
     }
+
     async check(req, res) {
         const token = generateJwt(req.user.id, req.user.username, req.user.role);
         return res.json({ token });
     }
     async logout(req, res, next) {
+        try {
+            const { refreshToken } = req.cookies;
+            const token = await userService.logout(refreshToken);
+            res.clearCookie('refreshToken');
+            return res.json(token);
+        } catch (e) {
+            next(e);
+        }
 
     }
     async refresh(req, res, next) {
 
     }
     async activate(req, res, next) {
-        try{
+        try {
             const activationLink = req.params.link;
             console.log(activationLink);
             await userService.activate(activationLink);
@@ -86,8 +85,8 @@ class UserController {
     }
 
 
-      ////////////
-     /// CRUD ///
+    ////////////
+    /// CRUD ///
     ////////////
 
     async getAll(req, res) {
