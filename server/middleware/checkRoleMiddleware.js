@@ -1,31 +1,34 @@
 const jwt = require('jsonwebtoken');
+const ApiError = require('../error/ApiError');
+const tokenService = require('../service/token-service');
 
 module.exports = function (...roles) {
     return function (req, res, next) {
-        if (req.method === "OPTIONS") {
-            next();
-        }
         try {
-            const token = req.headers.authorization.split(' ')[1];
-            if (!token) {
-                return res.status(401).json({ message: "Не авторизован" });
+            const authorizationHeader = req.headers.authorization;
+            if (!authorizationHeader) {
+                return next(ApiError.UnauthorizedError());
             }
-            const decoded = jwt.verify(token, process.env.SECRET_KEY);
-            console.log(decoded.role);
-           
-            for(let i = 0;  i < roles.length; i++){
-                console.log(roles[i]);
-                if (decoded.role == roles[i]) {
-                    req.user = decoded;
-                    console.log(decoded.role);
+            const accessToken = authorizationHeader.split(' ')[1];
+            if (!accessToken) {
+                return next(ApiError.UnauthorizedError());
+            }
+            const userData = tokenService.validateAccessToken(accessToken);
+            if (!userData) {
+                return next(ApiError.UnauthorizedError());
+            }
+
+            for (let i = 0; i < roles.length; i++) {
+                if (userData.role == roles[i]) {
+                    req.user = userData;
                     next();
                     return;
                 }
             }
-            return res.status(403).json({ message: "Нет доступа" });
-            
+            return next(ApiError.forbidden('Нет доступа'));
+
         } catch (e) {
-            res.status(401).json({ message: "Не авторизован" })
+            return next(ApiError.UnauthorizedError());
         }
     }
 }
