@@ -8,10 +8,10 @@ const tokenService = require('./token-service');
 const UserDto = require('../dtos/user-dto');
 const ApiError = require('../error/ApiError');
 
-class UserService{
-    async registration(email, password, role){
-        const candidate = await User.findOne({where: {email}})
-        if (candidate){
+class UserService {
+    async registration(email, password, role) {
+        const candidate = await User.findOne({ where: { email } })
+        if (candidate) {
             throw ApiError.badRequest(`Пользователь с почтовым адресом ${email} уже существует`);
         }
         const hashPassword = await bcrypt.hash(password, 3);
@@ -20,8 +20,8 @@ class UserService{
 
         await mailService.sendActivationMail(email, `${process.env.API_URL}/api/user/activate/${activationLink}`);
 
-        const userDto = new UserDto(user); 
-        const tokens = tokenService.generateTokens({...UserDto});
+        const userDto = new UserDto(user);
+        const tokens = tokenService.generateTokens({ ...UserDto });
         await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
         return {
@@ -30,18 +30,18 @@ class UserService{
         }
     }
 
-    async activate(activationLink){
-        const user = await User.findOne({where: {activationLink}})
-        if(!user){
+    async activate(activationLink) {
+        const user = await User.findOne({ where: { activationLink } })
+        if (!user) {
             throw ApiError.badRequest('Неккоректная ссылка активации');
         }
         user.isActivated = true;
         await user.save();
     }
 
-    async login(email, password){
+    async login(email, password) {
         const user = await User.findOne({ where: { email } });
-        if (!user){
+        if (!user) {
             throw ApiError.badRequest('Пользователь с таким email не найден');
         }
 
@@ -51,7 +51,7 @@ class UserService{
         }
 
         const userDto = new UserDto(user);
-        const tokens = tokenService.generateTokens({...userDto});
+        const tokens = tokenService.generateTokens({ ...userDto });
         await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
         return {
@@ -60,10 +60,33 @@ class UserService{
         }
     }
 
-    async logout(refreshToken)
-    {
+    async logout(refreshToken) {
         const token = await tokenService.removeToken(refreshToken);
         return token;
+    }
+
+    async refresh(refreshToken) {
+        if (!refreshToken) {
+            throw ApiError.UnauthorizedError();
+        }
+        const userData = tokenService.validateRefreshToken(refreshToken);
+        const tokenFromDb = await tokenService.findToken(refreshToken);
+
+        if (!userData || !tokenFromDb) {
+            throw ApiError.UnauthorizedError();
+        }
+
+        const user = await User.findOne({ where: { id: userData.id } });
+
+        const userDto = new UserDto(user);
+        const tokens = tokenService.generateTokens({ ...userDto });
+
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+        return {
+            ...tokens,
+            user: userDto
+        }
     }
 }
 
