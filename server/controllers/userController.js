@@ -2,23 +2,11 @@ require('dotenv').config();
 
 const { User } = require('../models/models');
 
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-
 const ApiError = require('../error/ApiError');
 const status_code = require('../error/ErrorMessages');
 const userService = require('../service/user-service');
 
 const { validationResult } = require('express-validator');
-
-
-// const generateJwt = (id, username, role) => {
-//     return jwt.sign(
-//         { id, username, role },
-//         process.env.SECRET_KEY,
-//         { expiresIn: '24h' }
-//     );
-// }
 
 class UserController {
 
@@ -42,7 +30,6 @@ class UserController {
             next(ApiError.badRequest(e.message));
         }
     }
-
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
@@ -53,11 +40,6 @@ class UserController {
         } catch (e) {
             next(ApiError.badRequest(e.message));
         }
-    }
-
-    async check(req, res) {
-        const token = generateJwt(req.user.id, req.user.username, req.user.role);
-        return res.json({ token });
     }
     async logout(req, res, next) {
         try {
@@ -71,7 +53,14 @@ class UserController {
 
     }
     async refresh(req, res, next) {
-
+        try {
+            const { refreshToken } = req.cookies;
+            const userData = await userService.refresh(refreshToken);
+            res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true })
+            return res.json(userData);
+        } catch (e) {
+            next(e);
+        }
     }
     async activate(req, res, next) {
         try {
@@ -95,11 +84,11 @@ class UserController {
     }
     async update(req, res, next) {
         try {
-            const { id, username, password, role } = req.body;
+            const { id, email, password, role } = req.body;
             if (!id) {
                 return next(ApiError.badRequest(status_code[490]));
             }
-            if (!username || !password) {
+            if (!email || !password) {
                 return next(ApiError.badRequest(status_code[462]));
             }
             const newUser = await User.findOne({ where: { id } });
@@ -110,7 +99,7 @@ class UserController {
 
             let user = await User.update(
                 {
-                    username: username,
+                    email: email,
                     password: hashPassword,
                     role: role
                 },
@@ -137,7 +126,7 @@ class UserController {
             if (!delUser) {
                 return next(ApiError.badRequest(status_code[452]));
             }
-            let user = await User.destroy({ where: { id } });
+            await User.destroy({ where: { id } });
             return res.json(`Запись ${id} удалена`);
         } catch (e) {
             next(ApiError.badRequest(e.message));

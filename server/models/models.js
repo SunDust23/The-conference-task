@@ -6,13 +6,13 @@ const User = sequelize.define('user', {
     email: { type: DataTypes.STRING, unique: true, allowNull: false },
     password: { type: DataTypes.STRING, allowNull: false },
     role: { type: DataTypes.STRING, defaultValue: "USER" },
-    isActivated: {type: DataTypes.BOOLEAN, defaultValue: false},
-    activationLink: {type: DataTypes.STRING},
+    isActivated: { type: DataTypes.BOOLEAN, defaultValue: false },
+    activationLink: { type: DataTypes.STRING },
 })
 
 const Token = sequelize.define('token', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    refreshToken: {type: DataTypes.STRING, allowNull: false},
+    refreshToken: { type: DataTypes.STRING, allowNull: false },
 })
 
 const Talk = sequelize.define('talk', {
@@ -36,19 +36,19 @@ const Speaker = sequelize.define('speaker', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }
 })
 
-Room.hasMany(Schedule, {onDelete: 'cascade'});
+Room.hasMany(Schedule, { onDelete: 'cascade' });
 Schedule.belongsTo(Room);
 
-Talk.hasMany(Schedule, {onDelete: 'cascade'});
+Talk.hasMany(Schedule, { onDelete: 'cascade' });
 Schedule.belongsTo(Talk);
 
-User.belongsToMany(Talk, {through: Speaker, onDelete: 'cascade'});
-Talk.belongsToMany(User, {through: Speaker, onDelete: 'cascade'});
+User.belongsToMany(Talk, { through: Speaker, onDelete: 'cascade' });
+Talk.belongsToMany(User, { through: Speaker, onDelete: 'cascade' });
 
 User.hasOne(Token);
 Token.belongsTo(User);
 
-module.exports={
+module.exports = {
     User,
     Talk,
     Speaker,

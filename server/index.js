@@ -25,7 +25,7 @@ app.use(errorHandler);      // Обработка ошибок !!!Обязате
 const start = async () => {
     try {
         await sequelize.authenticate();         //Установка подключения к БД
-        await sequelize.sync({force: true});    //Сверяем состояние БД со схемой данных
+        await sequelize.sync({ alter: true });    //Сверяем состояние БД со схемой данных
 
         /* В случае изменения модели {alter: true} вносит изменения в существующие таблицы 
         * {force: true} - пересоздаёт таблицы заново
