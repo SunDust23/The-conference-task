@@ -8,11 +8,18 @@ const checkRole = require('../middleware/checkRoleMiddleware');
 //Auth
 router.post('/registration', userController.registration);
 router.post('/login', userController.login);
+router.post('/logout', userController.logout);
+router.get('/refresh', userController.refresh);
+router.get('/activate/:link', userController.activate);
+
 router.get('/auth', authMiddleware, userController.check);
 
-//CRUD for admins
+
+
+
+// //CRUD for admins
 router.get('/', checkRole("ADMIN"), userController.getAll);
-router.put('/', checkRole("ADMIN"), userController.update);
-router.delete('/:id', checkRole("ADMIN"), userController.delOne);
+// router.put('/', checkRole("ADMIN"), userController.update);
+// router.delete('/:id', checkRole("ADMIN"), userController.delOne);
 
 module.exports = router;

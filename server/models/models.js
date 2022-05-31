@@ -3,9 +3,16 @@ const { DataTypes } = require('sequelize'); //Описание типов дан
 
 const User = sequelize.define('user', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    username: { type: DataTypes.STRING, unique: true },
-    password: { type: DataTypes.STRING },
-    role: { type: DataTypes.STRING, defaultValue: "USER" }
+    email: { type: DataTypes.STRING, unique: true, allowNull: false },
+    password: { type: DataTypes.STRING, allowNull: false },
+    role: { type: DataTypes.STRING, defaultValue: "USER" },
+    isActivated: {type: DataTypes.BOOLEAN, defaultValue: false},
+    activationLink: {type: DataTypes.STRING},
+})
+
+const Token = sequelize.define('token', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    refreshToken: {type: DataTypes.STRING, allowNull: false},
 })
 
 const Talk = sequelize.define('talk', {
@@ -38,10 +45,14 @@ Schedule.belongsTo(Talk);
 User.belongsToMany(Talk, {through: Speaker, onDelete: 'cascade'});
 Talk.belongsToMany(User, {through: Speaker, onDelete: 'cascade'});
 
+User.hasOne(Token);
+Token.belongsTo(User);
+
 module.exports={
     User,
     Talk,
     Speaker,
     Room,
-    Schedule
+    Schedule,
+    Token
 }
