@@ -83,41 +83,6 @@ class UserController {
         return res.json(users);
     }
     async update(req, res, next) {
-        // try {
-        //     const { id, email, password, role } = req.body;
-        //     if (!id) {
-        //         return next(ApiError.badRequest(error_message_code[490]));
-        //     }
-        //     if (!email || !password) {
-        //         return next(ApiError.badRequest(error_message_code[462]));
-        //     }
-        //     const newUser = await User.findOne({ where: { id } });
-        //     if (!newUser) {
-        //         return next(ApiError.badRequest(error_message_code[452]));
-        //     }
-        //     const hashPassword = await bcrypt.hash(password, 5);
-
-        //     let user = await User.update(
-        //         {
-        //             email: email,
-        //             password: hashPassword,
-        //             role: role
-        //         },
-        //         {
-        //             where: { id },
-        //         }
-        //     );
-
-        //     user = await User.findOne(
-        //         {
-        //             where: { id }
-        //         },
-        //     )
-
-        //     return res.json(user);
-        // } catch (e) {
-        //     next(ApiError.badRequest(e.message));
-        // }
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {

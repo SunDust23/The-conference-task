@@ -94,10 +94,6 @@ class UserService {
         if (!user) {
             throw ApiError.badRequest('Пользователь с таким email не найден');
         }
-        // const isPassEquals = await bcrypt.compare(password, user.password);
-        // if (!isPassEquals) {
-        //     throw ApiError.badRequest('Неверный пароль');
-        // }
 
         user.role = role;
         await user.save();
