@@ -1,4 +1,4 @@
-let status_code = {
+let error_message_code = {
     452: "Пользователь с таким логином не найден",
     453: "Пользователь с таким логином уже существует",
 
@@ -24,4 +24,4 @@ let status_code = {
 
 }
 
-module.exports = status_code;
+module.exports = error_message_code;

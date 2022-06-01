@@ -1,18 +1,18 @@
 const { User, Talk, Speaker } = require('../models/models');
 const ApiError = require('../error/ApiError');
 
-const status_code = require('../error/ErrorMessages');
+const error_message_code = require('../error/ErrorMessages');
 
 class TalkController {
     async create(req, res, next) {
         try {
             const { title, description } = req.body;
             if (!title) {
-                return next(ApiError.badRequest(status_code[474]));
+                return next(ApiError.badRequest(error_message_code[474]));
             }
             const newTalk = await Talk.findOne({ where: { title } });
             if (newTalk) {
-                return next(ApiError.badRequest(status_code[473]));
+                return next(ApiError.badRequest(error_message_code[473]));
             }
             const userId = req.user.id;
             const talk = await Talk.create({ title, description });
@@ -32,7 +32,7 @@ class TalkController {
             console.log(newUser);
 
             if (!newUser) {
-                return next(ApiError.badRequest(status_code[452]));
+                return next(ApiError.badRequest(error_message_code[452]));
             }
             const { id } = req.params;
 
@@ -44,7 +44,7 @@ class TalkController {
                 },
             )
             if (!talk) {
-                return next(ApiError.badRequest(status_code[472]));
+                return next(ApiError.badRequest(error_message_code[472]));
             }
             const talkId = talk.id;
             const speaker = await Speaker.create({ userId, talkId })
@@ -71,10 +71,10 @@ class TalkController {
             const { id, title, description } = req.body;
 
             if (!id) {
-                return next(ApiError.badRequest(status_code[490]));
+                return next(ApiError.badRequest(error_message_code[490]));
             }
             if (!title || !description) {
-                return next(ApiError.badRequest(status_code[474]));
+                return next(ApiError.badRequest(error_message_code[474]));
             }
 
             let talk = await Talk.findOne(
@@ -83,7 +83,7 @@ class TalkController {
                 },
             );
             if (!talk) {
-                return next(ApiError.badRequest(status_code[472]));
+                return next(ApiError.badRequest(error_message_code[472]));
             }
 
             //Здесь, возможно, нужна проверка на то, является ли докладчик автором доклалда или это админ
@@ -114,7 +114,7 @@ class TalkController {
             let { id } = req.params;
             const delTalk = await Talk.findOne({ where: { id } });
             if (!delTalk) {
-                return next(ApiError.badRequest(status_code[472]));
+                return next(ApiError.badRequest(error_message_code[472]));
             }
             let talkId = id;
 

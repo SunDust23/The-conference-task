@@ -3,7 +3,7 @@ require('dotenv').config();
 const { User } = require('../models/models');
 
 const ApiError = require('../error/ApiError');
-const status_code = require('../error/ErrorMessages');
+const error_message_code = require('../error/ErrorMessages');
 const userService = require('../service/user-service');
 
 const { validationResult } = require('express-validator');
@@ -86,14 +86,14 @@ class UserController {
         try {
             const { id, email, password, role } = req.body;
             if (!id) {
-                return next(ApiError.badRequest(status_code[490]));
+                return next(ApiError.badRequest(error_message_code[490]));
             }
             if (!email || !password) {
-                return next(ApiError.badRequest(status_code[462]));
+                return next(ApiError.badRequest(error_message_code[462]));
             }
             const newUser = await User.findOne({ where: { id } });
             if (!newUser) {
-                return next(ApiError.badRequest(status_code[452]));
+                return next(ApiError.badRequest(error_message_code[452]));
             }
             const hashPassword = await bcrypt.hash(password, 5);
 
@@ -124,7 +124,7 @@ class UserController {
             let { id } = req.params;
             const delUser = await User.findOne({ where: { id } });
             if (!delUser) {
-                return next(ApiError.badRequest(status_code[452]));
+                return next(ApiError.badRequest(error_message_code[452]));
             }
             await User.destroy({ where: { id } });
             return res.json(`Запись ${id} удалена`);

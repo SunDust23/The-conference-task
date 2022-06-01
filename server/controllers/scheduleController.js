@@ -1,7 +1,7 @@
 const { Schedule } = require('../models/models');
 const ApiError = require('../error/ApiError');
 
-const status_code = require('../error/ErrorMessages');
+const error_message_code = require('../error/ErrorMessages');
 
 class ScheduleController {
     async create(req, res, next) {
@@ -9,18 +9,18 @@ class ScheduleController {
             let { roomId, talkId, datetime } = req.body;
 
             if (!roomId) {
-                return next(ApiError.badRequest(status_code[478]));
+                return next(ApiError.badRequest(error_message_code[478]));
             }
             if (!talkId) {
-                return next(ApiError.badRequest(status_code[477]));
+                return next(ApiError.badRequest(error_message_code[477]));
             }
             if (!datetime) {
-                return next(ApiError.badRequest(status_code[479]));
+                return next(ApiError.badRequest(error_message_code[479]));
             }
 
             const newSchedule = await Schedule.findOne({ where: { roomId, datetime } }); //сделать + проверку на 15 минут вперёд
             if (newSchedule) {
-                return next(ApiError.badRequest(status_code[483]));
+                return next(ApiError.badRequest(error_message_code[483]));
             }
 
             const schedule = await Schedule.create({ roomId, talkId, datetime });
@@ -64,16 +64,16 @@ class ScheduleController {
 
 
             if (!id) {
-                return next(ApiError.badRequest(status_code[490]));
+                return next(ApiError.badRequest(error_message_code[490]));
             }
             if (!roomId) {
-                return next(ApiError.badRequest(status_code[478]));
+                return next(ApiError.badRequest(error_message_code[478]));
             }
             if (!talkId) {
-                return next(ApiError.badRequest(status_code[477]));
+                return next(ApiError.badRequest(error_message_code[477]));
             }
             if (!datetime) {
-                return next(ApiError.badRequest(status_code[479]));
+                return next(ApiError.badRequest(error_message_code[479]));
             }
 
             let schedule = await Schedule.update(
@@ -103,7 +103,7 @@ class ScheduleController {
             let { id } = req.params;
             const delSchedule = await Schedule.findOne({ where: { id } });
             if (!delSchedule) {
-                return next(ApiError.badRequest(status_code[482]));
+                return next(ApiError.badRequest(error_message_code[482]));
             }
             let schedule = await Schedule.destroy({ where: { id } });
             return res.json(`Запись ${id} удалена`);
