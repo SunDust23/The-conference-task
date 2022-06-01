@@ -88,6 +88,29 @@ class UserService {
             user: userDto
         }
     }
+
+    async updateRole(email, role) {
+        const user = await User.findOne({ where: { email } })
+        if (!user) {
+            throw ApiError.badRequest('Пользователь с таким email не найден');
+        }
+        // const isPassEquals = await bcrypt.compare(password, user.password);
+        // if (!isPassEquals) {
+        //     throw ApiError.badRequest('Неверный пароль');
+        // }
+
+        user.role = role;
+        await user.save();
+    
+        const userDto = new UserDto(user);
+        const tokens = tokenService.generateTokens({ ...UserDto });
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+        return {
+            ...tokens,
+            user: userDto
+        }
+    }
 }
 
 module.exports = new UserService();

@@ -10,7 +10,7 @@ const { body } = require('express-validator');
 router.post('/registration',
     body('email').isEmail(),
     body('password').isLength({ min: 6, max: 32 }),
-    body('role').isIn([null, 'SPEAKER', 'ADMIN']),
+    body('role').isIn([null, 'USER', 'SPEAKER', 'ADMIN']),
     userController.registration
 );
 
@@ -22,7 +22,11 @@ router.get('/activate/:link', userController.activate);
 router.get('/', authMiddleware, userController.getAll);
 
 //CRUD for admins
-router.put('/', checkRole("ADMIN"), userController.update);
+router.put('/', checkRole("ADMIN"),
+    body('email').isEmail(),
+    body('role').isIn(['USER', 'SPEAKER', 'ADMIN']), 
+    userController.update
+);
 router.delete('/:id', checkRole("ADMIN"), userController.delOne);
 
 module.exports = router;

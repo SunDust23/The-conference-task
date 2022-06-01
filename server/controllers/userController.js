@@ -83,38 +83,52 @@ class UserController {
         return res.json(users);
     }
     async update(req, res, next) {
+        // try {
+        //     const { id, email, password, role } = req.body;
+        //     if (!id) {
+        //         return next(ApiError.badRequest(error_message_code[490]));
+        //     }
+        //     if (!email || !password) {
+        //         return next(ApiError.badRequest(error_message_code[462]));
+        //     }
+        //     const newUser = await User.findOne({ where: { id } });
+        //     if (!newUser) {
+        //         return next(ApiError.badRequest(error_message_code[452]));
+        //     }
+        //     const hashPassword = await bcrypt.hash(password, 5);
+
+        //     let user = await User.update(
+        //         {
+        //             email: email,
+        //             password: hashPassword,
+        //             role: role
+        //         },
+        //         {
+        //             where: { id },
+        //         }
+        //     );
+
+        //     user = await User.findOne(
+        //         {
+        //             where: { id }
+        //         },
+        //     )
+
+        //     return res.json(user);
+        // } catch (e) {
+        //     next(ApiError.badRequest(e.message));
+        // }
         try {
-            const { id, email, password, role } = req.body;
-            if (!id) {
-                return next(ApiError.badRequest(error_message_code[490]));
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return next(ApiError.badRequest(`Ошибка при валидации`, errors.array()));
             }
-            if (!email || !password) {
-                return next(ApiError.badRequest(error_message_code[462]));
-            }
-            const newUser = await User.findOne({ where: { id } });
-            if (!newUser) {
-                return next(ApiError.badRequest(error_message_code[452]));
-            }
-            const hashPassword = await bcrypt.hash(password, 5);
 
-            let user = await User.update(
-                {
-                    email: email,
-                    password: hashPassword,
-                    role: role
-                },
-                {
-                    where: { id },
-                }
-            );
+            const { email, role } = req.body;
+            const userData = await userService.updateRole( email, role);
+            res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true })
+            return res.json(userData);
 
-            user = await User.findOne(
-                {
-                    where: { id }
-                },
-            )
-
-            return res.json(user);
         } catch (e) {
             next(ApiError.badRequest(e.message));
         }
