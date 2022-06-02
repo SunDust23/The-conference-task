@@ -1,8 +1,9 @@
 const { Schedule } = require('../models/models');
 const ApiError = require('../error/ApiError');
-const { Op } = require("sequelize");
 
 const error_message_code = require('../error/ErrorMessages');
+const scheduleService  = require('../service/schedule-service');
+const { Op } = require('sequelize');
 
 class ScheduleController {
     async create(req, res, next) {
@@ -22,22 +23,8 @@ class ScheduleController {
                 return next(ApiError.badRequest(error_message_code[485]));
             }
 
-            const newSchedule = await Schedule.findOne(
-                {
-                    where:
-                    {
-                        roomId,
-                        [Op.or]: [
-                            {[Op.and]: [{ beginDatetime: {[Op.lt]: end}, endDatetime: {[Op.gte]: end} }]},
-                            {[Op.and]: [{ beginDatetime: {[Op.lte]: begin}, endDatetime: {[Op.gte]: end} }]},
-                            {[Op.and]: [{ beginDatetime: {[Op.lte]: begin}, endDatetime: {[Op.gt]: begin} }]}
-                        ]
-                    }
-                }); 
-            if (newSchedule) {
-                return next(ApiError.badRequest(error_message_code[483]));
-            }
-
+            await scheduleService.checkDate(roomId, begin, end);
+           
             const schedule = await Schedule.create({ roomId, talkId, beginDatetime: begin, endDatetime: end });
             return res.json(schedule)
         } catch (e) {
@@ -75,8 +62,7 @@ class ScheduleController {
     }
     async update(req, res, next) {
         try {
-            const { id, roomId, talkId, datetime } = req.body;
-
+            const { id, roomId, talkId, begin, end } = req.body;
 
             if (!id) {
                 return next(ApiError.badRequest(error_message_code[490]));
@@ -87,28 +73,34 @@ class ScheduleController {
             if (!talkId) {
                 return next(ApiError.badRequest(error_message_code[477]));
             }
-            if (!datetime) {
+            if (!begin || !end) {
                 return next(ApiError.badRequest(error_message_code[479]));
             }
+            if (begin >= end) {
+                return next(ApiError.badRequest(error_message_code[485]));
+            }
 
-            let schedule = await Schedule.update(
+           await scheduleService.checkUpdateDate(id, roomId, begin, end);
+
+            let updatedSchedule = await Schedule.update(
                 {
                     roomId: roomId,
                     talkId: talkId,
-                    datetime: datetime
+                    beginDatetime: begin, 
+                    endDatetime: end
                 },
                 {
                     where: { id },
                 }
             );
 
-            schedule = await Schedule.findOne(
+            updatedSchedule = await Schedule.findOne(
                 {
                     where: { id }
                 },
             )
 
-            return res.json(schedule);
+            return res.json(updatedSchedule);
         } catch (e) {
             next(ApiError.badRequest(e.message));
         }
