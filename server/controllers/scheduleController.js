@@ -3,7 +3,6 @@ const ApiError = require('../error/ApiError');
 
 const error_message_code = require('../error/ErrorMessages');
 const scheduleService  = require('../service/schedule-service');
-const { Op } = require('sequelize');
 
 class ScheduleController {
     async create(req, res, next) {
