@@ -18,7 +18,7 @@ const Token = sequelize.define('token', {
 const Talk = sequelize.define('talk', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     title: { type: DataTypes.STRING, unique: true, allowNull: false },
-    description: { type: DataTypes.STRING }
+    description: { type: DataTypes.STRING },
 })
 
 const Room = sequelize.define('room', {
@@ -29,7 +29,8 @@ const Room = sequelize.define('room', {
 
 const Schedule = sequelize.define('schedule', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    datetime: { type: DataTypes.DATE, allowNull: false }
+    beginDatetime: { type: DataTypes.DATE, allowNull: false },
+    endDatetime: { type: DataTypes.DATE, allowNull: false }
 })
 
 const Speaker = sequelize.define('speaker', {

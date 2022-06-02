@@ -1,12 +1,13 @@
 const { Schedule } = require('../models/models');
 const ApiError = require('../error/ApiError');
+const { Op } = require("sequelize");
 
 const error_message_code = require('../error/ErrorMessages');
 
 class ScheduleController {
     async create(req, res, next) {
         try {
-            let { roomId, talkId, datetime } = req.body;
+            let { roomId, talkId, begin, end } = req.body;
 
             if (!roomId) {
                 return next(ApiError.badRequest(error_message_code[478]));
@@ -14,16 +15,30 @@ class ScheduleController {
             if (!talkId) {
                 return next(ApiError.badRequest(error_message_code[477]));
             }
-            if (!datetime) {
+            if (!begin || !end) {
                 return next(ApiError.badRequest(error_message_code[479]));
             }
+            if (begin >= end) {
+                return next(ApiError.badRequest(error_message_code[485]));
+            }
 
-            const newSchedule = await Schedule.findOne({ where: { roomId, datetime } }); //сделать + проверку на 15 минут вперёд
+            const newSchedule = await Schedule.findOne(
+                {
+                    where:
+                    {
+                        roomId,
+                        [Op.or]: [
+                            {[Op.and]: [{ beginDatetime: {[Op.lt]: end}, endDatetime: {[Op.gte]: end} }]},
+                            {[Op.and]: [{ beginDatetime: {[Op.lte]: begin}, endDatetime: {[Op.gte]: end} }]},
+                            {[Op.and]: [{ beginDatetime: {[Op.lte]: begin}, endDatetime: {[Op.gt]: begin} }]}
+                        ]
+                    }
+                }); 
             if (newSchedule) {
                 return next(ApiError.badRequest(error_message_code[483]));
             }
 
-            const schedule = await Schedule.create({ roomId, talkId, datetime });
+            const schedule = await Schedule.create({ roomId, talkId, beginDatetime: begin, endDatetime: end });
             return res.json(schedule)
         } catch (e) {
             next(ApiError.badRequest(e.message));
