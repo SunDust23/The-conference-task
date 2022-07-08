@@ -13,7 +13,8 @@ class ScheduleService {
                     [Op.or]: [
                         { [Op.and]: [{ beginDatetime: { [Op.lt]: end }, endDatetime: { [Op.gte]: end } }] },
                         { [Op.and]: [{ beginDatetime: { [Op.lte]: begin }, endDatetime: { [Op.gte]: end } }] },
-                        { [Op.and]: [{ beginDatetime: { [Op.lte]: begin }, endDatetime: { [Op.gt]: begin } }] }
+                        { [Op.and]: [{ beginDatetime: { [Op.lte]: begin }, endDatetime: { [Op.gt]: begin } }] },
+                        { [Op.and]: [{ beginDatetime: { [Op.gte]: begin }, endDatetime: { [Op.lte]: end } }]}
                     ]
                 }
             });

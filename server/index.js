@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 7000;
 const app = express();
 
 app.use(express.json());    // Необходимо, чтобы приложение могло парсить JSON формат  
-app.use(cookieParser());
+app.use(cookieParser());    // Для работы с cookie
 app.use(cors());            // Нужен, чтобы принимать запросы с браузера
 
 app.use('/api', router);    // '/api' - URL, по которому должен обрабатывается router
